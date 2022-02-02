@@ -9,7 +9,7 @@ public class Gui extends JFrame {
     public Gui() {
         super("RACF-GEN");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(1000, 1000));
+        setMinimumSize(new Dimension(500, 500));
 
         //size//
         Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();

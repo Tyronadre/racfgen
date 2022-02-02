@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="racfgen:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/racfgen_jar</output-path>
+    <root id="archive" name="racfgen.jar">
+      <element id="module-output" name="racfgen" />
+    </root>
+  </artifact>
+</component>
