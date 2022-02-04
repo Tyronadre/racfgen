@@ -46,7 +46,6 @@ public class Content {
             String[] temp;
             contentList.clear();
             while ((temp = reader.readMyLine()) != null) {
-                System.out.println(Arrays.toString(temp));
                 contentList.add(new Data(temp[0], temp[1], temp[2]));
             }
             contentList.sort(Comparator.comparing(o -> o.racf));
@@ -86,7 +85,11 @@ public class Content {
         List<Integer> num_list = new LinkedList<>();
         for (Data data : contentList) {
             if (data.racf.length() >= 4 && racf_name.equals(data.racf.substring(0, 4))) {
-                num_list.add(Integer.parseInt(data.racf.substring(5, 7)));
+                try {
+                    num_list.add(Integer.parseInt(data.racf.substring(5, 7)));
+                } catch (Exception e) {
+                    System.err.println(("Couldn't parse "+ data.racf+ ". RACF will be ignored!"));
+                }
             }
         }
         while (num_list.contains(racf_num_temp))
@@ -114,22 +117,43 @@ public class Content {
                 lastname = temp[0];
             }
             //Fälle für ä,ö,ü
-            if (lastname.charAt(0) == 'ä')
-                racfname.append("ae");
-            else if (lastname.charAt(0) == 'ö')
-                racfname.append("oe");
-            else if (lastname.charAt(0) == 'ü')
-                racfname.append("ue");
-            else if (lastname.charAt(0) == 'ß')
-                racfname.append("ss");
-            //Fall sch
-            else if (lastname.startsWith("sch")) {
-                racfname.append("sc");
-                lastname = lastname.substring(3);
-                continue;
-            } else
-                racfname.append(lastname.charAt(0));
-            lastname = lastname.substring(1);
+            switch (lastname.charAt(0)) {
+                case 'ä':
+                case 'Ä':
+                    lastname = lastname.substring(1);
+                    racfname.append("ae");
+                    break;
+                case 'ö':
+                case 'Ö':
+                    lastname = lastname.substring(1);
+                    racfname.append("oe");
+                    break;
+                case 'ü':
+                case 'Ü':
+                    lastname = lastname.substring(1);
+                    racfname.append("ue");
+                    break;
+                case 'É':
+                case 'È':
+                case 'é':
+                case 'è':
+                    lastname = lastname.substring(1);
+                    racfname.append("e");
+                    break;
+                case 'ß':
+                    lastname = lastname.substring(1);
+                    racfname.append("ss");
+                    break;
+                default:
+                    if (lastname.startsWith("sch")) {
+                        racfname.append("sc");
+                        lastname = lastname.substring(3);
+                    } else {
+                        racfname.append(lastname.charAt(0));
+                        lastname = lastname.substring(1);
+                    }
+            }
+
         }
         return racfname.substring(0, 4).toLowerCase();
     }
@@ -145,8 +169,10 @@ public class Content {
             }
         }
         contentList.remove(d);
-        file_all.delete();
-        file_all.createNewFile();
+        if (!file_all.delete())
+            System.err.println("File Write Error");
+        if (!file_all.createNewFile())
+            System.err.println("File Write Error");
         try (RACFWriter writer = new RACFWriter(file_all)) {
             for (Data t : contentList) {
                 writer.writeMyLine(t.id, t.racf, t.name);
@@ -158,12 +184,19 @@ public class Content {
     }
 
     public void importCSV() throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader("src/export.csv")); RACFWriter writer = new RACFWriter(file_all)){
-            String line = "";
-            while ((line = reader.readLine()) != null){
+        File csv = new File("src/export.csv");
+        if (!file_all.delete())
+            throw new IOException("Failed to Import");
+        if (!file_all.createNewFile())
+            throw new IOException("Failed to Import");
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/export.csv")); RACFWriter writer = new RACFWriter(file_all)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
                 String[] t = line.split(",");
-                writer.writeMyLine(getID(),t[0],t[1]+" "+t[2]);
+                writer.writeMyLine(getID(), t[0], t[1] + " " + t[2]);
             }
+        } catch (IOException e) {
+            throw new IOException("Failed to Import");
         }
 
     }

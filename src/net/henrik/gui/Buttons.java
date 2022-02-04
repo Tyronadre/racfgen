@@ -70,12 +70,16 @@ public class Buttons extends JPanel {
         jButton_Cheat.addActionListener(e -> {
             try {
                 content.importCSV();
+                mainView.update();
             } catch (IOException ex) {
                 ErrorMessage.infoBox("Couldn't import. File has to be in src/export.csv\n"+ex.getMessage(),"Error");
             }
         });
         jButton_DeleteLastRacf.setEnabled(false);
         jButton_Cheat.setEnabled(false);
+        jButton_Cheat.setToolTipText("F1 im Textfeld zum aktivieren");
+        jButton_Update.setToolTipText("Lese Daten von internem File ein. Zieht nicht aus AD!");
+        jButton_DeleteLastRacf.setToolTipText("Löscht letzten erstellten Eintrag vollständig");
 
         this.setLayout(new BorderLayout());
 
